@@ -1,13 +1,61 @@
 import { View, Text, ScrollView, Image, TextInput } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
 import { BellIcon, MagnifyingGlassIcon } from "react-native-heroicons/outline";
+import Categories from "../components/Categories";
+import axios from "axios";
+import Recipes from "../components/Recipes";
 
 const Home = () => {
+  const [activeCategory, setActiveCategory] = useState("Chicken");
+  const [categories, setCategories] = useState([]);
+  const [recipes, setRecipes] = useState([]);
+
+  const getCategories = async () => {
+    try {
+      const response = await axios.get(
+        "https://themealdb.com/api/json/v1/1/categories.php"
+      );
+
+      if (response && response.data) {
+        setCategories(response.data.categories);
+      }
+    } catch (error) {
+      console.log("error : ", error.message);
+    }
+  };
+  const getRecipes = async (category = "Chicken") => {
+    try {
+      console.log(category);
+      const response = await axios.get(
+        `https://themealdb.com/api/json/v1/1/filter.php?c=${category}`
+      );
+
+      if (response && response.data) {
+        setRecipes(response.data.meals);
+      }
+    } catch (error) {
+      console.log("error : ", error.message);
+    }
+  };
+
+  useEffect(() => {
+    if (recipes.length == 0) {
+      getCategories();
+      getRecipes();
+    }
+  });
+
+  const handleChangeCategory = (category) => {
+    getRecipes(category);
+    setActiveCategory(category);
+    setRecipes([]);
+  };
+
   return (
     <View className="flex-1 bg-white">
       <StatusBar style="dark" />
@@ -65,6 +113,20 @@ const Home = () => {
         </View>
 
         {/* Categories */}
+        <View>
+          {categories.length > 0 && (
+            <Categories
+              activeCategory={activeCategory}
+              handleChangeCategory={handleChangeCategory}
+              categories={categories}
+            />
+          )}
+        </View>
+
+        {/* Recipes */}
+        <View>
+          <Recipes meals={recipes} categories={categories} />
+        </View>
       </ScrollView>
     </View>
   );
