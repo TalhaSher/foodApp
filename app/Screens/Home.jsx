@@ -11,7 +11,7 @@ import axios from "axios";
 import Recipes from "../components/Recipes";
 
 const Home = () => {
-  const [activeCategory, setActiveCategory] = useState("Chicken");
+  const [activeCategory, setActiveCategory] = useState("Beef");
   const [categories, setCategories] = useState([]);
   const [recipes, setRecipes] = useState([]);
 
@@ -28,11 +28,11 @@ const Home = () => {
       console.log("error : ", error.message);
     }
   };
-  const getRecipes = async (category = "Chicken") => {
+  const getRecipes = async () => {
     try {
-      console.log(category);
+      console.log(activeCategory);
       const response = await axios.get(
-        `https://themealdb.com/api/json/v1/1/filter.php?c=${category}`
+        `https://themealdb.com/api/json/v1/1/filter.php?c=${activeCategory}`
       );
 
       if (response && response.data) {
@@ -44,11 +44,9 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (recipes.length == 0) {
-      getCategories();
-      getRecipes();
-    }
-  });
+    getCategories();
+    getRecipes();
+  }, [activeCategory]);
 
   const handleChangeCategory = (category) => {
     getRecipes(category);
