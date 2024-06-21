@@ -1,5 +1,5 @@
 import { View, Text, ScrollView, Image, TouchableOpacity } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRoute } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
@@ -16,6 +16,7 @@ import {
 import { useNavigation } from "expo-router";
 import axios from "axios";
 import Loading from "../components/Loading";
+import YoutubePlayer from "react-native-youtube-iframe";
 
 const RecipeDetails = () => {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -51,6 +52,21 @@ const RecipeDetails = () => {
 
     return indexes;
   };
+
+  const getYoutubeId = (url) => {
+    const regex = /[?&]v=([^&]+)/;
+    const match = url.match(regex);
+    if (match && match[1]) {
+      return match[1];
+    }
+    return null;
+  };
+
+  const onStateChange = useCallback((state) => {
+    if (state === "ended") {
+      Alert.alert("video has finished playing!");
+    }
+  }, []);
 
   useEffect(() => {
     if (meal == null) {
@@ -223,10 +239,16 @@ const RecipeDetails = () => {
                     className="bg-amber-300 rounded-full"
                   />
                   <View className="flex-row space-x-2">
-                    <Text className="font-extrabold text-neutral-700">
+                    <Text
+                      className="font-extrabold text-neutral-700"
+                      style={{ fontSize: hp(1.7) }}
+                    >
                       {meal["strMeasure" + i]}
                     </Text>
-                    <Text className="font-medium text-neutral-600">
+                    <Text
+                      className="font-medium text-neutral-600"
+                      style={{ fontSize: hp(1.7) }}
+                    >
                       {meal["strIngredient" + i]}
                     </Text>
                   </View>
@@ -234,6 +256,36 @@ const RecipeDetails = () => {
               ))}
             </View>
           </View>
+          {/* Instructions */}
+          <View className="space-y-4">
+            <Text style={hp(1.5)} className="font-bold flex-1 text-neutral-700">
+              Instructions
+            </Text>
+            <Text style={{ fontSize: hp(1.6) }} className="text-neutral-700">
+              {meal?.strInstructions}
+            </Text>
+          </View>
+
+          {/* Recipe Youtube Iframe */}
+
+          {meal.strYoutube && (
+            <View className="space-y-4">
+              <Text
+                style={hp(1.5)}
+                className="font-bold flex-1 text-neutral-700"
+              >
+                Recipe Video
+              </Text>
+              <View>
+                <YoutubePlayer
+                  height={hp(30)}
+                  play={false}
+                  videoId={getYoutubeId(meal.strYoutube)}
+                  onChangeState={onStateChange}
+                />
+              </View>
+            </View>
+          )}
         </View>
       )}
     </ScrollView>
