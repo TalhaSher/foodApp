@@ -3,11 +3,11 @@ import React from "react";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { mealData } from "../../constants/mealData";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
+import Loading from "./Loading";
+import { useNavigation } from "expo-router";
 
-const Recipes = ({ activeCategory, categories, meals }) => {
-  const filteredData = mealData.filter(
-    (meal) => meal.category === activeCategory
-  );
+const Recipes = ({ categories, meals }) => {
+  const navigation = useNavigation();
 
   return (
     <View style={{ marginHorizontal: 16, marginTop: 20 }}>
@@ -22,12 +22,14 @@ const Recipes = ({ activeCategory, categories, meals }) => {
         Recipes
       </Text>
 
-      {categories.length == 0 || meals.length == 0 ? null : (
+      {categories.length == 0 || meals.length == 0 ? (
+        <Loading size="large" className="mt-20 " />
+      ) : (
         <FlatList
           data={meals}
           numColumns={2}
           renderItem={({ item, index }) => (
-            <RecipeCard item={item} index={index} />
+            <RecipeCard item={item} index={index} navigation={navigation} />
           )}
           columnWrapperStyle={{ justifyContent: "space-between" }}
           contentContainerStyle={{ paddingBottom: 50 }}
@@ -37,7 +39,9 @@ const Recipes = ({ activeCategory, categories, meals }) => {
   );
 };
 
-const RecipeCard = ({ item, index }) => {
+const RecipeCard = ({ item, index, navigation }) => {
+  const Navigation = useNavigation();
+
   const isEven = index % 2 === 0;
   return (
     <Animated.View
@@ -52,6 +56,7 @@ const RecipeCard = ({ item, index }) => {
       <Pressable
         style={{ paddingLeft: isEven ? 0 : 8, paddingRight: isEven ? 8 : 0 }}
         className="flex justify-center mb-4 space-y-1"
+        onPress={() => navigation.navigate("RecipeDetails", { ...item })}
       >
         <Image
           source={{ uri: item.strMealThumb }}
@@ -62,6 +67,7 @@ const RecipeCard = ({ item, index }) => {
           }}
           className="bg-black/5"
         />
+
         <Text
           style={{ fontSize: hp(1.5) }}
           className="font-semibold ml-2 text-neutral-600 text-center"

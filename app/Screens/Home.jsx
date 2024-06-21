@@ -9,58 +9,53 @@ import { BellIcon, MagnifyingGlassIcon } from "react-native-heroicons/outline";
 import Categories from "../components/Categories";
 import axios from "axios";
 import Recipes from "../components/Recipes";
-
-const Home = () => {
+export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState("Beef");
   const [categories, setCategories] = useState([]);
-  const [recipes, setRecipes] = useState([]);
+  const [meals, setMeals] = useState([]);
+
+  useEffect(() => {
+    getCategories();
+    getRecipes();
+  }, []);
+
+  const handleChangeCategory = (category) => {
+    getRecipes(category);
+    setActiveCategory(category);
+    setMeals([]);
+  };
 
   const getCategories = async () => {
     try {
       const response = await axios.get(
         "https://themealdb.com/api/json/v1/1/categories.php"
       );
-
       if (response && response.data) {
         setCategories(response.data.categories);
       }
-    } catch (error) {
-      console.log("error : ", error.message);
+    } catch (err) {
+      console.log("error: ", err.message);
     }
   };
-  const getRecipes = async () => {
+  const getRecipes = async (category = "Beef") => {
     try {
-      console.log(activeCategory);
       const response = await axios.get(
-        `https://themealdb.com/api/json/v1/1/filter.php?c=${activeCategory}`
+        `https://themealdb.com/api/json/v1/1/filter.php?c=${category}`
       );
-
       if (response && response.data) {
-        setRecipes(response.data.meals);
+        setMeals(response.data.meals);
       }
-    } catch (error) {
-      console.log("error : ", error.message);
+    } catch (err) {
+      console.log("error: ", err.message);
     }
   };
-
-  useEffect(() => {
-    getCategories();
-    getRecipes();
-  }, [activeCategory]);
-
-  const handleChangeCategory = (category) => {
-    getRecipes(category);
-    setActiveCategory(category);
-    setRecipes([]);
-  };
-
   return (
     <View className="flex-1 bg-white">
       <StatusBar style="dark" />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 50 }}
-        className="space-y-6 pt-14 "
+        className="space-y-6 pt-14"
       >
         {/* avatar and bell icon */}
         <View className="mx-4 flex-row justify-between items-center mb-2">
@@ -68,66 +63,59 @@ const Home = () => {
             source={require("../../assets/images/avatar.png")}
             style={{ height: hp(5), width: hp(5.5) }}
           />
-          <BellIcon size={hp(4)} color="grey" />
+          <BellIcon size={hp(4)} color="gray" />
         </View>
 
-        {/* Greeting & Punchline */}
+        {/* greetings and punchline */}
         <View className="mx-4 space-y-2 mb-2">
           <Text style={{ fontSize: hp(1.7) }} className="text-neutral-600">
-            Hello, Talha
+            Hello, Noman!
           </Text>
           <View>
             <Text
-              className="font-semibold text-neutral-600"
               style={{ fontSize: hp(3.8) }}
+              className="font-semibold text-neutral-600"
             >
-              Make you own food,
+              Make your own food,
             </Text>
           </View>
           <Text
-            className="font-semibold text-neutral-600"
             style={{ fontSize: hp(3.8) }}
+            className="font-semibold text-neutral-600"
           >
-            Stay at <Text className="text-amber-400">home</Text>
+            stay at <Text className="text-amber-400">home</Text>
           </Text>
         </View>
 
-        {/* Search Bar */}
+        {/* search bar */}
         <View className="mx-4 flex-row items-center rounded-full bg-black/5 p-[6px]">
           <TextInput
             placeholder="Search any recipe"
             placeholderTextColor={"gray"}
             style={{ fontSize: hp(1.7) }}
-            className="flex-1 text-base mb-1 pl-3 tracking-wider "
+            className="flex-1 text-base mb-1 pl-3 tracking-wider"
           />
-
           <View className="bg-white rounded-full p-3">
-            <MagnifyingGlassIcon
-              size={hp(2.5)}
-              color={"gray"}
-              strokeWidth={3}
-            />
+            <MagnifyingGlassIcon size={hp(2.5)} strokeWidth={3} color="gray" />
           </View>
         </View>
 
-        {/* Categories */}
+        {/* categories */}
         <View>
           {categories.length > 0 && (
             <Categories
+              categories={categories}
               activeCategory={activeCategory}
               handleChangeCategory={handleChangeCategory}
-              categories={categories}
             />
           )}
         </View>
 
-        {/* Recipes */}
+        {/* recipes */}
         <View>
-          <Recipes meals={recipes} categories={categories} />
+          <Recipes meals={meals} categories={categories} />
         </View>
       </ScrollView>
     </View>
   );
-};
-
-export default Home;
+}
