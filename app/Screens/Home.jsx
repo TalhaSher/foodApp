@@ -69,7 +69,7 @@ export default function HomeScreen() {
         {/* greetings and punchline */}
         <View className="mx-4 space-y-2 mb-2">
           <Text style={{ fontSize: hp(1.7) }} className="text-neutral-600">
-            Hello, Noman!
+            Hello, Talha!
           </Text>
           <View>
             <Text
